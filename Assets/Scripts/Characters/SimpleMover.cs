@@ -5,7 +5,7 @@ using UnityEngine;
 public class SimpleMover : MonoBehaviour
 {
     public float speed = 5.0f;
-    public float junmpForce = 5.0f;
+    public float jumpForce = 5.0f;
     private Rigidbody rb;
     private bool isGrounded;
 
@@ -21,6 +21,12 @@ public class SimpleMover : MonoBehaviour
         {
             float moveX = Input.GetAxis("Horizontal");
             float moveZ = Input.GetAxis("Vertical");
+            if(Input.GetButtonDown("Jump") && isGrounded == true)
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                isGrounded = false;
+            }
+                        
 
             Vector3 moveDir = new Vector3(moveX, 0, moveZ).normalized; // 斜め移動が速くならないように正規化
 
@@ -34,4 +40,14 @@ public class SimpleMover : MonoBehaviour
         
         // ※ Unity 6 の場合は rb.linearVelocity = newVelocity; になります
     }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+            Debug.Log("地面と接触中");
+        }
+    }
+
 }
