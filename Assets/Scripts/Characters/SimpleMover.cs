@@ -5,7 +5,9 @@ using UnityEngine;
 public class SimpleMover : MonoBehaviour
 {
     public float speed = 5.0f;
+    public float junmpForce = 5.0f;
     private Rigidbody rb;
+    private bool isGrounded;
 
     void Start()
     {
