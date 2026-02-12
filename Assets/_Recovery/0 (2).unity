@@ -370,7 +370,6 @@ MonoBehaviour:
   resultTimeText: {fileID: 1069057795}
   recorder: {fileID: 1865875385}
   loader: {fileID: 1247732931}
-  start: 0
 --- !u!4 &340534892
 Transform:
   m_ObjectHideFlags: 0

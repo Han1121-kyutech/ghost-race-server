@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Linq; // ★データの並び替えに必要
 
 public class GhostLoader : MonoBehaviour
 {
@@ -47,12 +48,24 @@ public class GhostLoader : MonoBehaviour
                         if(g.name.StartsWith("Ghost_")) Destroy(g);
                     }
 
-                    // 全員出現させる
-                    foreach (var ghostData in response.ghosts)
+                    // ★★★ ここを変更しました（Top3に絞る処理） ★★★
+                    
+                    // 1. タイムが0より大きい（バグデータ除外）
+                    // 2. タイムが速い順（小さい順）に並べる
+                    // 3. 上から3人だけ取る
+                    var top1Ghosts = response.ghosts
+                        .Where(g => g.clear_time > 0)
+                        .OrderBy(g => g.clear_time)
+                        .Take(1)
+                        .ToList();
+
+                    // 選ばれし3人だけを出現させる
+                    foreach (var ghostData in top1Ghosts)
                     {
                         SpawnGhost(ghostData);
                     }
-                    Debug.Log("ゴースト召喚完了！");
+                    
+                    Debug.Log($"ランキング上位 {top1Ghosts.Count} 名のゴーストを召喚しました！");
                 }
             }
             else

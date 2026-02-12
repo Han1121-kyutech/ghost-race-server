@@ -16,9 +16,10 @@ public class GameManager : MonoBehaviour
     public GhostRecorder recorder; // Playerをアタッチ
     public GhostLoader loader;     // GhostManagerをアタッチ
 
-    private string playerName = "NoName";
+    private string playerName = "";
     private bool isPlaying = false;
     private float startTime;
+    public bool start = false;//操作可能かどうか
 
     void Awake()
     {
@@ -45,6 +46,10 @@ public class GameManager : MonoBehaviour
         {
             playerName = nameInput.text;
             PlayerPrefs.SetString("PlayerName", playerName);
+            start = true;//操作可能
+        } else {
+            Debug.LogWarning("名前を入力してください！");
+            return;
         }
 
         if (titlePanel != null) titlePanel.SetActive(false);
@@ -56,10 +61,9 @@ public class GameManager : MonoBehaviour
         isPlaying = true;
         startTime = Time.time;
 
-        // 録画開始
+        // 録画開始(仮)
         if (recorder != null) recorder.StartRecording();
-        
-        // ゴースト読み込み
+        // ゴースト読み込み開始
         if (loader != null) loader.LoadGhosts();
     }
 
@@ -69,6 +73,7 @@ public class GameManager : MonoBehaviour
         if (!isPlaying) return;
 
         isPlaying = false;
+        start = false;//ゴールした後に操作させない
         float clearTime = Time.time - startTime;
 
         // 録画停止＆アップロード
