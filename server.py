@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import List
 from supabase import create_client, Client
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI()
 
@@ -23,7 +25,6 @@ supabase: Client = create_client(url, key)
 class GhostRequest(BaseModel):
     player_name: str
     clear_time: float
-    motion_data: str
     secret_key: str
     recordInterval: float
     frames: list[dict]
@@ -41,7 +42,7 @@ def upload_ghost(data: GhostRequest):
         res = supabase.table("ghost_runs").insert({
             "player_name": data.player_name,
             "clear_time": data.clear_time,
-            "motion_data": data.motion_data,
+            "motion_data": data.frames,
             "secret_key": data.secret_key
         }).execute()
         return {"status": "success"}

@@ -15,7 +15,7 @@ public class GhostFrame
 [System.Serializable]
 public class GhostData
 {
-    public float recordInterval;
+    public float recordInterval = 0.1f;
     public string player_name;
     public float clear_time;
     public GhostData motion_data;
