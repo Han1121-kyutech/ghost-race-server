@@ -49,7 +49,7 @@ public class GhostRecorder : MonoBehaviour
     {
         Debug.Log("サーバーへアップロード中...");
 
-        GhostPayload payload = new GhostPayload();
+        GhostData payload = new GhostData();
         payload.player_name = playerName;
         payload.clear_time = time;
         payload.motion_data = recordedData;

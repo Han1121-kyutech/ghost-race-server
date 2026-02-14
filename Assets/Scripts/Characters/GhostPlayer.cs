@@ -1,23 +1,28 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem; // これを足さないと新しい機能が使えません
 
 public class GhostPlayer : MonoBehaviour
 {
-    // 再生するデータ
     private GhostData data;
+    private float elapsedTime = 0f; 
+    private bool isPlaying = false; 
 
-    // ★重要：GhostLoaderから呼ばれる関数
-    // 「データを受け取って、すぐに再生を始める」
+    // ① SetupAndPlayを「Prepare（準備）」に名称変更し、スタート処理を分離
     public void SetupAndPlay(GhostData newData)
     {
         this.data = newData;
+        this.elapsedTime = 0f; 
 
-        // データが空でなければ再生スタート
         if (data != null && data.frames != null && data.frames.Count > 0)
         {
-            StartCoroutine(PlayCoroutine());
+            // 防衛的プログラミング：もしデータに間隔が入っていなければ0.1秒とする
+            if (data.recordInterval <= 0) data.recordInterval = 0.1f;
+
+            // スタート地点（最初のフレーム）に配置だけしておく
+            transform.position = data.frames[0].pos;
+            transform.rotation = data.frames[0].rot;
+            
+            isPlaying = false; // まだ走らせない
+            Debug.Log($"ゴースト準備完了：{data.player_name} (間隔: {data.recordInterval}s)");
         }
         else
         {
@@ -25,22 +30,44 @@ public class GhostPlayer : MonoBehaviour
         }
     }
 
-    IEnumerator PlayCoroutine()
+    // ② カウントダウン終了時に外から叩くメソッド
+    public void StartGhost()
     {
-        // データの最初から最後までループ
-        for (int i = 0; i < data.frames.Count; i++)
+        if (data != null && data.frames.Count > 0)
         {
-            GhostFrame frame = data.frames[i];
+            isPlaying = true;
+            Debug.Log("ゴースト、スタート！");
+        }
+    }
 
-            // 位置と回転を再現
-            transform.position = frame.pos;
-            transform.rotation = frame.rot;
+    void Update()
+    {
+        if (!isPlaying || data == null) return;
 
-            // 0.1秒待つ（録画間隔と同じにする）
-            yield return new WaitForSeconds(0.1f);
+        elapsedTime += Time.deltaTime;
+
+        // ③ 魔法の数字「0.1f」を「data.recordInterval」に置換
+        float interval = data.recordInterval;
+        int index = Mathf.FloorToInt(elapsedTime / interval);
+
+        if (index >= data.frames.Count - 1)
+        {
+            var lastFrame = data.frames[data.frames.Count - 1];
+            transform.position = lastFrame.pos;
+            transform.rotation = lastFrame.rot;
+            
+            isPlaying = false;
+            Debug.Log("ゴーストが完走しました");
+            return;
         }
 
-        // 再生が終わったらどうするか？（とりあえずログを出す）
-        // Debug.Log("ゴーストがゴールしました");
+        GhostFrame frameA = data.frames[index];
+        GhostFrame frameB = data.frames[index + 1];
+
+        // 進行度 $t$ の計算も柔軟に対応
+        float t = (elapsedTime % interval) / interval;
+
+        transform.position = Vector3.Lerp(frameA.pos, frameB.pos, t);
+        transform.rotation = Quaternion.Lerp(frameA.rot, frameB.rot, t);
     }
 }

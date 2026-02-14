@@ -17,7 +17,7 @@ public class GhostLoader : MonoBehaviour
     public class GhostListResponse
     {
         public string status;
-        public List<GhostPayload> ghosts;
+        public List<GhostData> ghosts;
     }
 
     // GameManagerから呼ばれる：ゴースト読み込み開始
@@ -76,7 +76,7 @@ public class GhostLoader : MonoBehaviour
         }
     }
 
-    void SpawnGhost(GhostPayload payload)
+    void SpawnGhost(GhostData payload)
     {
         if (payload.motion_data == null || payload.motion_data.frames == null || payload.motion_data.frames.Count == 0) return;
 
@@ -91,7 +91,7 @@ public class GhostLoader : MonoBehaviour
         GhostPlayer playerScript = newGhost.GetComponent<GhostPlayer>();
         if (playerScript != null)
         {
-            playerScript.SetupAndPlay(payload.motion_data);
+            playerScript.SetupAndPlay(payload);//ここで苦戦中
         }
     }
 }

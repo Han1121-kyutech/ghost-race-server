@@ -25,6 +25,7 @@ class GhostRequest(BaseModel):
     clear_time: float
     motion_data: dict
     secret_key: str
+    recordInterval: float
 
 @app.get("/")
 def read_root():
