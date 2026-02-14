@@ -33,6 +33,7 @@ def read_root():
 @app.post("/upload")
 def upload_ghost(data: GhostRequest):
     print(f"データ受信: {data.player_name} - {data.clear_time}秒")
+    print(f"受け取った合言葉: {data.secret_key}")
     try:
         # Supabaseに保存
         res = supabase.table("ghost_runs").insert({
