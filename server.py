@@ -23,7 +23,7 @@ supabase: Client = create_client(url, key)
 class GhostRequest(BaseModel):
     player_name: str
     clear_time: float
-    motion_data: dict
+    motion_data: str
     secret_key: str
     recordInterval: float
 
