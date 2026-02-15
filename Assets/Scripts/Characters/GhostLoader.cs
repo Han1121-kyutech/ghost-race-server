@@ -11,6 +11,7 @@ public class GhostLoader : MonoBehaviour
     public string serverUrl = "https://ghost-race-server.onrender.com/list";
     
     public GameObject ghostPrefab;
+    public bool isLoaded;//ゴーストのロードが完了したかどうか
 
     // サーバーからの返事を受け取る用
     [System.Serializable]
@@ -28,6 +29,7 @@ public class GhostLoader : MonoBehaviour
 
     IEnumerator DownloadGhosts()
     {
+        isLoaded = false;
         Debug.Log("ゴーストのリストを取得中...");
 
         using (UnityWebRequest request = UnityWebRequest.Get(serverUrl))
@@ -37,6 +39,7 @@ public class GhostLoader : MonoBehaviour
             if (request.result == UnityWebRequest.Result.Success)
             {
                 string json = request.downloadHandler.text;
+                Debug.Log("データ受信成功！：" + request.downloadHandler.text);
                 
                 // 受信データを確認
                 GhostListResponse response = JsonUtility.FromJson<GhostListResponse>(json);
@@ -49,21 +52,22 @@ public class GhostLoader : MonoBehaviour
                         if(g.name.StartsWith("Ghost_")) Destroy(g);
                     }
 
-                    // ★★★ ここを変更しました（Top3に絞る処理） ★★★
+                    // ★★★ ここを変更しました（Top1に絞る処理） ★★★
                     
                     // 1. タイムが0より大きい（バグデータ除外）
                     // 2. タイムが速い順（小さい順）に並べる
-                    // 3. 上から3人だけ取る
+                    // 3. 上から1人だけ取る
                     var top1Ghosts = response.ghosts
                         .Where(g => g.clear_time > 0)
                         .OrderBy(g => g.clear_time)
                         .Take(1)
                         .ToList();
 
-                    // 選ばれし3人だけを出現させる
+                    // 選ばれし1人だけを出現させる
                     foreach (var ghostData in top1Ghosts)
                     {
                         SpawnGhost(ghostData);
+                        isLoaded = true;
                     }
                     
                     Debug.Log($"ランキング上位 {top1Ghosts.Count} 名のゴーストを召喚しました！");
@@ -72,13 +76,18 @@ public class GhostLoader : MonoBehaviour
             else
             {
                 Debug.LogError("ダウンロード失敗: " + request.error);
+                Debug.LogError("サーバーからの返答: " + request.error);
             }
         }
     }
 
     void SpawnGhost(GhostData payload)
     {
-        if (payload.motion_data == null || payload.motion_data.frames == null || payload.motion_data.frames.Count == 0) return;
+        if (payload == null || payload.frames == null || payload.frames.Count == 0) 
+        {
+            Debug.LogWarning($"{payload?.player_name} のフレームデータが空です。");
+            return;
+        }
 
         GameObject newGhost = Instantiate(ghostPrefab);
         newGhost.name = "Ghost_" + payload.player_name;
@@ -91,7 +100,7 @@ public class GhostLoader : MonoBehaviour
         GhostPlayer playerScript = newGhost.GetComponent<GhostPlayer>();
         if (playerScript != null)
         {
-            playerScript.SetupAndPlay(payload);//ここで苦戦中
+            playerScript.SetupAndPlay(payload);
         }
     }
 }

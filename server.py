@@ -42,7 +42,7 @@ def upload_ghost(data: GhostRequest):
         res = supabase.table("ghost_runs").insert({
             "player_name": data.player_name,
             "clear_time": data.clear_time,
-            "motion_data": data.frames,
+            "frames": data.frames,
             "secret_key": data.secret_key
         }).execute()
         return {"status": "success"}

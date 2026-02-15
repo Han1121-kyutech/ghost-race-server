@@ -18,7 +18,6 @@ public class GhostData
     public float recordInterval = 0.1f;
     public string player_name;
     public float clear_time;
-    public GhostData motion_data;
     public string secret_key = "tyohan1121";// これがないとサーバーが受け付けてくれません（バグ防止のため）
 
 

@@ -14,6 +14,9 @@ public class GhostPlayer : MonoBehaviour
 
         if (data != null && data.frames != null && data.frames.Count > 0)
         {
+            Vector3 startPos = data.frames[0].pos;
+            Debug.Log($"ゴースト配置：{data.player_name} / 座標：{startPos}");
+
             // 防衛的プログラミング：もしデータに間隔が入っていなければ0.1秒とする
             if (data.recordInterval <= 0) data.recordInterval = 0.1f;
 

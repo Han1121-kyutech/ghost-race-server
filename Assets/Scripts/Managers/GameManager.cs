@@ -2,10 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem; // これを足さないと新しい機能が使えません
+using System.Collections; // ★これが必要です
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
+    public Text countdownText;//3,2,1の表示
 
     [Header("UI設定")]
     public GameObject titlePanel;
@@ -21,6 +23,8 @@ public class GameManager : MonoBehaviour
     private bool isPlaying = false;
     private float startTime;
     public bool start = false;//操作可能かどうか
+    public SimpleMover Move;
+    public GhostLoader isLoaded;
 
     void Awake()
     {
@@ -40,6 +44,25 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    IEnumerator CountdownSequence()
+    {
+        yield return new WaitForSeconds(1.0f);//ゴーストロードまで待機
+        countdownText.text = "3";
+        yield return new WaitForSeconds(1.0f);
+        countdownText.text = "2";
+        yield return new WaitForSeconds(1.0f);
+        countdownText.text = "1";
+        yield return new WaitForSeconds(1.0f);
+        countdownText.text = "Go!";
+
+        GhostPlayer[] allGhosts = Object.FindObjectsByType<GhostPlayer>(FindObjectsSortMode.None);
+        foreach (GhostPlayer ghost in allGhosts)
+        {
+            ghost.StartGhost();
+        }
+        countdownText.text = "";
+        Move.StartMove = true;//カウントダウンが終わったら動けるようにする
+    }
     // ★スタートボタン用
     public void OnStartButtonClick()
     {
@@ -75,6 +98,7 @@ public class GameManager : MonoBehaviour
 
         isPlaying = false;
         start = false;//ゴールした後に操作させない
+        Move.StartMove = false;//ゴールした後に操作させない
         float clearTime = Time.time - startTime;
 
         // 録画停止＆アップロード
@@ -83,6 +107,9 @@ public class GameManager : MonoBehaviour
         // 結果表示
         if (resultPanel != null) resultPanel.SetActive(true);
         if (resultTimeText != null) resultTimeText.text = "Time: " + clearTime.ToString("F2") + "s";
+        // 今いるゴーストを消す
+        GameObject[] existingGhosts = GameObject.FindGameObjectsWithTag("Player");
+
     }
 
     // ★リトライボタン用
@@ -97,6 +124,11 @@ public class GameManager : MonoBehaviour
         if (isPlaying && (Keyboard.current.gKey.wasPressedThisFrame))
         {
             FinishGame();
+        }
+
+        if (Keyboard.current.hKey.wasPressedThisFrame && isLoaded.isLoaded == true)
+        {
+            StartCoroutine(CountdownSequence());
         }
     }
 }
